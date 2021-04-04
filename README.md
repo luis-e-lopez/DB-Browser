@@ -18,8 +18,13 @@ There is a docker-compose.yml file for convenience if you want to use it to star
 2. Download Tomcat 9
 
 3. Configure Tomcat's Deployment Directory to point to `[Project Root Directory]/src/main/webapp`
+Create the webapp directory if not present.
+
+4. Configure Tomcat's Context Path to `/`
 
 4. Run Tomcat
 
 4. In your browser navigate to http://localhost:8080/index
 ---
+
+REST API documentation is under way...
