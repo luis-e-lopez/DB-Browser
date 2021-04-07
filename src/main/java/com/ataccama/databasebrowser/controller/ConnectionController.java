@@ -2,6 +2,7 @@ package com.ataccama.databasebrowser.controller;
 
 import com.ataccama.databasebrowser.model.Connection;
 import com.ataccama.databasebrowser.service.ConnectionService;
+import com.ataccama.databasebrowser.service.DatabaseTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,9 +19,13 @@ public class ConnectionController {
     @Autowired
     private ConnectionService connectionService;
 
+    @Autowired
+    private DatabaseTypeService databaseTypeService;
+
     @GetMapping("/connectionForm")
     public String showAddConnectionForm(Model model) {
         model.addAttribute("connection", new Connection());
+        model.addAttribute("databaseTypes", databaseTypeService.findAll());
         return "add-connection";
     }
 

@@ -75,6 +75,61 @@ $(function () {
     });
   }
 
+  function getStatisticsTable(
+      connectionId,
+      schema,
+      table,
+      callback,
+      errorCallback
+    ) {
+      $.ajax({
+        url:
+          "/tableStats?connectionId=" +
+          connectionId +
+          "&schema=" +
+          schema +
+          "&table=" +
+          table,
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+          callback(data.stats, schema, table);
+        },
+        error: function (xhr) {
+          errorCallback(xhr, connectionId);
+        },
+      });
+    }
+
+   function getStatisticsColumn(
+     connectionId,
+     schema,
+     table,
+     column,
+     callback,
+     errorCallback
+   ) {
+     $.ajax({
+       url:
+         "/columnStats?connectionId=" +
+         connectionId +
+         "&schema=" +
+         schema +
+         "&table=" +
+         table +
+         "&column=" +
+         column,
+       type: "GET",
+       dataType: "json",
+       success: function (data) {
+         callback(data.stats, schema, table, column);
+       },
+       error: function (xhr) {
+         errorCallback(xhr, connectionId);
+       },
+     });
+   }
+
   //////////
   // DOM manipulation and event handlers
   /////////
@@ -160,14 +215,57 @@ $(function () {
       });
   }
 
+  function addStatisticsTableClickHandler(element) {
+      $(element)
+        .find(".stats-table")
+        .click(function (e) {
+          let connectionId = $(this)
+            .closest(".schemas-level")
+            .data("connectionid");
+          let schema = $(this).closest(".db-menu").data("schema");
+          let table = $(this).data("stats-table");
+          getStatisticsTable(
+            connectionId,
+            schema,
+            table,
+            populateStatisticsTableInfo,
+            showError
+          );
+          e.stopPropagation();
+        });
+    }
+
+  function addStatisticsColumnClickHandler(element) {
+      $(element)
+        .find(".column-menu")
+        .click(function (e) {
+            let connectionId = $(this)
+              .closest(".schemas-level")
+              .data("connectionid");
+            let schema = $(this).closest(".db-menu").data("schema");
+            let table = $(this).closest(".table-menu").data("table");
+            let column = $(this).data("column");
+
+            getStatisticsColumn(
+              connectionId,
+              schema,
+              table,
+              column,
+              populateStatisticsColumnInfo,
+              showError
+            );
+
+            e.stopPropagation();
+        });
+    }
+
   function populateDatabasesList(databases, connectionId) {
     let schemaElement = $(".schemas-level").find(
       `[data-connectionid='${connectionId}']`
     );
-    // let schemaElement = $(".schemas-sublevel");
     schemaElement.empty();
-    databases.forEach(function (dbName) {
-      schemaElement.append(createAccordionHTMLForDatabases(dbName));
+    databases.forEach(function (db) {
+      schemaElement.append(createAccordionHTMLForDatabases(db.name));
     });
     initDBMenu(schemaElement);
   }
@@ -186,13 +284,18 @@ $(function () {
     var previewButton =
       '<button type="button" data-preview-table=' +
       tableName +
-      ' class="hollow button preview-table">preview</button>';
+      ' class="hollow button preview-table">prev</button>';
+    var statisticsButton =
+      '<button type="button" data-stats-table=' +
+      tableName +
+      ' class="hollow button stats-table">stats</button>';
     var table =
       '<li class="table-menu" data-table="' +
       tableName +
       '" aria-expanded="false"><a class="subitem" >' +
       tableName +
       previewButton +
+      statisticsButton +
       "</a></li>";
     return table;
   }
@@ -257,11 +360,12 @@ $(function () {
       .find(`[data-schema='${schema}']`)
       .find(".tables-sublevel");
     tablesElement.empty();
-    tables.forEach(function (tableName) {
-      tablesElement.append(createAccordionHTMLForTables(tableName));
+    tables.forEach(function (table) {
+      tablesElement.append(createAccordionHTMLForTables(table.name));
     });
     initTablesMenu(tablesElement);
     addPreviewTableClickHandler(tablesElement);
+    addStatisticsTableClickHandler(tablesElement);
   }
 
   function populateColumnsList(columns, table, schema, connectionId) {
@@ -274,12 +378,13 @@ $(function () {
     columns.forEach(function (column) {
       columnsElement.append(
         createAccordionHTMLForColumns(
-          column.COLUMN_NAME,
-          column.COLUMN_TYPE,
-          column.COLUMN_KEY
+          column.name,
+          column.type,
+          column.key
         )
       );
     });
+    addStatisticsColumnClickHandler(columnsElement);
   }
 
   function populatePreviewTable(rows, columns) {
@@ -287,13 +392,13 @@ $(function () {
     previewTableElement.empty();
     let columnNames = "";
     columns.forEach(function (column) {
-      columnNames += "<th>" + column.COLUMN_NAME + "</th>";
+      columnNames += "<th>" + column.name + "</th>";
     });
     let rowsData = "";
     rows.forEach(function (row) {
       let currentRow = "";
       columns.forEach(function (column) {
-        currentRow += "<td>" + row[column.COLUMN_NAME] + "</td>";
+        currentRow += "<td>" + row[column.name] + "</td>";
       });
       rowsData += "<tr>" + currentRow + "</tr>";
     });
@@ -312,6 +417,38 @@ $(function () {
         "<h5>Database: " +
         schema +
         "</h5>"
+    );
+  }
+
+  function populateStatisticsTableInfo(stats, schema, table) {
+      $(".statistics-table-info").empty();
+      $(".statistics-table-info").append(
+        "<h4>Statistics of table: <b>" +
+          table +
+          "</b> </h4>" +
+          "<h5>Database: " +
+          schema +
+          "</h5>" +
+          "<p>Number of Attributes: <b>" + stats.columnsCount + "</b>, " +
+          "Number of Records: <b>" + stats.recordsCount + "</b></p><hr/>"
+      );
+    }
+
+  function populateStatisticsColumnInfo(stats, schema, table, column) {
+    $(".statistics-column-info").empty();
+    $(".statistics-column-info").append(
+      "<h4>Statistics of column: <b>" +
+        column +
+        "</b> </h4>" +
+        "<h5>Database: " +
+        schema +
+        "</h5>" +
+        "<h5>Table: " +
+        table +
+        "</h5>" +
+        "<p>MAX: <b>" + stats.max + "</b>, " +
+        "MIN: <b>" + stats.min + "</b>, " +
+        "AVG: <b>" + stats.avg + "</b></p><hr/>"
     );
   }
 
