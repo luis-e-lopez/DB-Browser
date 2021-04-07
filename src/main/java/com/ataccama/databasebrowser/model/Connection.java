@@ -1,7 +1,9 @@
 package com.ataccama.databasebrowser.model;
 
 import javax.persistence.*;
+import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
 @Entity
@@ -29,6 +31,11 @@ public class Connection {
 
     @NotBlank(message = "Password is mandatory")
     private String password;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "databasetype_id")
+    private DatabaseType databaseType;
 
     public Connection() {
     }
@@ -89,4 +96,11 @@ public class Connection {
         this.password = password;
     }
 
+    public DatabaseType getDatabaseType() {
+        return databaseType;
+    }
+
+    public void setDatabaseType(DatabaseType databaseType) {
+        this.databaseType = databaseType;
+    }
 }

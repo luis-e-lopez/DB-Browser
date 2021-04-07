@@ -4,6 +4,7 @@ import com.ataccama.databasebrowser.exception.CannotConnectToDBException;
 import com.ataccama.databasebrowser.exception.ConnectionNotFoundException;
 import com.ataccama.databasebrowser.exception.DatabaseNotFoundException;
 import com.ataccama.databasebrowser.exception.TableNotFoundException;
+import com.ataccama.databasebrowser.model.*;
 import com.ataccama.databasebrowser.service.DBInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,9 +24,9 @@ public class DBInfoController {
     private DBInfoService dbInfoService;
 
     @GetMapping(value = "/schemas")
-    public Map<String, List<String>> getSchemas(@RequestParam(value = "connectionId") Long connectionId) {
+    public Map<String, List<Schema>> getSchemas(@RequestParam(value = "connectionId") Long connectionId) {
         try {
-            List<String> schemas = dbInfoService.getSchemas(connectionId);
+            List<Schema> schemas = dbInfoService.getSchemas(connectionId);
             return Map.of("schemas", schemas);
         } catch (ConnectionNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -35,10 +36,10 @@ public class DBInfoController {
     }
 
     @GetMapping(value = "/tables")
-    public Map<String, List<String>> getTables(@RequestParam(value = "connectionId") Long connectionId,
+    public Map<String, List<Table>> getTables(@RequestParam(value = "connectionId") Long connectionId,
                                   @RequestParam(value = "schema") String schema) {
         try {
-            List<String> tables = dbInfoService.getSchemaTables(connectionId, schema);
+            List<Table> tables = dbInfoService.getSchemaTables(connectionId, schema);
             return Map.of("tables", tables);
         } catch (DatabaseNotFoundException | ConnectionNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
@@ -49,7 +50,7 @@ public class DBInfoController {
     }
 
     @GetMapping(value = "/columns")
-    public Map<String, List> getColumns(@RequestParam(value = "connectionId") Long connectionId,
+    public Map<String, List<Column>> getColumns(@RequestParam(value = "connectionId") Long connectionId,
                                                 @RequestParam(value = "schema") String schema,
                                                 @RequestParam(value = "table") String table) {
         try {
@@ -68,6 +69,37 @@ public class DBInfoController {
         try {
             return Map.of("rows", dbInfoService.getTablePreview(connectionId, schema, table),
                 "columns", dbInfoService.getTableColumns(connectionId, schema, table));
+        } catch (DatabaseNotFoundException | TableNotFoundException | ConnectionNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (CannotConnectToDBException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+        }
+
+    }
+
+    // Statistics Endpoints
+
+    @GetMapping(value = "/tableStats")
+    public Map<String, TableStats> getTableStatistics(@RequestParam(value = "connectionId") Long connectionId,
+                                                      @RequestParam(value = "schema") String schema,
+                                                      @RequestParam(value = "table") String table) {
+        try {
+            return Map.of("stats", dbInfoService.getTableStatistics(connectionId, schema, table));
+        } catch (DatabaseNotFoundException | TableNotFoundException | ConnectionNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (CannotConnectToDBException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+        }
+
+    }
+
+    @GetMapping(value = "/columnStats")
+    public Map<String, ColumnStats> getColumnStatistics(@RequestParam(value = "connectionId") Long connectionId,
+                                                        @RequestParam(value = "schema") String schema,
+                                                        @RequestParam(value = "table") String table,
+                                                        @RequestParam(value = "column") String column) {
+        try {
+            return Map.of("stats", dbInfoService.getColumnStatistics(connectionId, schema, table, column));
         } catch (DatabaseNotFoundException | TableNotFoundException | ConnectionNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (CannotConnectToDBException e) {

@@ -69,6 +69,14 @@
                     </div>
                 </div>
 
+                <label>Select Database Type
+                    <select th:field="*{databaseType}">
+                        <option th:each="dbType : ${databaseTypes}"
+                                th:value="${dbType.id}"
+                                th:utext="${dbType.name}"/>
+                    </select>
+                </label>
+
                 <button type="submit" class="button" value="Add Connection">Add Connection</button>
             </form>
         </div>

@@ -1,6 +1,7 @@
 package com.ataccama.databasebrowser.service;
 
 import com.ataccama.databasebrowser.model.Connection;
+import com.ataccama.databasebrowser.model.DatabaseType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -15,9 +16,6 @@ import java.util.Map;
 public class DatasourceManagerServiceImpl implements DatasourceManagerService {
 
     private Map<Long, JdbcTemplate> jdbcConnections;
-
-    public static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
-    public static final String MYSQL_SERVER_URL = "jdbc:mysql://%s:%s/%s";
 
     @Autowired
     private ConnectionService connectionService;
@@ -40,11 +38,13 @@ public class DatasourceManagerServiceImpl implements DatasourceManagerService {
 
     private DataSource getDataSource(Connection connection) {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(MYSQL_DRIVER_CLASS_NAME);
-        dataSource.setUrl(String.format(MYSQL_SERVER_URL,
-                connection.getHostname(),
-                connection.getPort(),
-                connection.getDatabaseName()));
+        DatabaseType databaseType = connection.getDatabaseType();
+        dataSource.setDriverClassName(databaseType.getDriverClassName());
+        dataSource.setUrl(databaseType.getServerURL()
+                .replace("[hostname]", connection.getHostname())
+                .replace("[port]", String.valueOf(connection.getPort()))
+                .replace("[dbname]", connection.getDatabaseName())
+        );
         dataSource.setUsername(connection.getUsername());
         dataSource.setPassword(connection.getPassword());
         return dataSource;

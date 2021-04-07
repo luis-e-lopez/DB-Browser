@@ -4,6 +4,9 @@ import com.ataccama.databasebrowser.exception.CannotConnectToDBException;
 import com.ataccama.databasebrowser.exception.ConnectionNotFoundException;
 import com.ataccama.databasebrowser.exception.DatabaseNotFoundException;
 import com.ataccama.databasebrowser.exception.TableNotFoundException;
+import com.ataccama.databasebrowser.model.Column;
+import com.ataccama.databasebrowser.model.Schema;
+import com.ataccama.databasebrowser.model.Table;
 import com.ataccama.databasebrowser.service.DBInfoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +41,7 @@ public class TestDBInfoController {
 
     @Test
     public void testSuccessfulFindAllSchemas() throws Exception {
-        when(dbInfoService.getSchemas(5l)).thenReturn(Arrays.asList("schema1", "schema2"));
+        when(dbInfoService.getSchemas(5l)).thenReturn(Arrays.asList(new Schema("schema1"), new Schema("schema2")));
         mockMvc.perform(get("/schemas?connectionId=5")).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.schemas", hasSize(2)));
@@ -76,7 +79,7 @@ public class TestDBInfoController {
 
     @Test
     public void testSuccessfulFindAllTablesFromSchema() throws Exception {
-        when(dbInfoService.getSchemaTables(5l, "test")).thenReturn(Arrays.asList("table1", "table2"));
+        when(dbInfoService.getSchemaTables(5l, "test")).thenReturn(Arrays.asList(new Table("table1"), new Table("table2")));
         mockMvc.perform(get("/tables?connectionId=5&schema=test")).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.tables", hasSize(2)));
@@ -134,8 +137,8 @@ public class TestDBInfoController {
     public void testSuccessfulFindAllColumnsFromTable() throws Exception {
         when(dbInfoService.getTableColumns(5l, "test", "table1"))
                 .thenReturn(Arrays.asList(
-                        Map.of("COLUMN_NAME", "column1", "COLUMN_TYPE", "int", "COLUMN_KEY", "PRI"),
-                        Map.of("COLUMN_NAME", "column2", "COLUMN_TYPE", "varchar", "COLUMN_KEY", "")));
+                        new Column("column1","int","PRI"),
+                        new Column("column2","varchar","")));
         mockMvc.perform(get("/columns?connectionId=5&schema=test&table=table1")).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.columns", hasSize(2)));
@@ -215,8 +218,8 @@ public class TestDBInfoController {
                         Map.of("column1", "I am in second row", "column2", "second column and second row")));
         when(dbInfoService.getTableColumns(5l, "test", "table1"))
                 .thenReturn(Arrays.asList(
-                        Map.of("COLUMN_NAME", "column1", "COLUMN_TYPE", "int", "COLUMN_KEY", "PRI"),
-                        Map.of("COLUMN_NAME", "column2", "COLUMN_TYPE", "varchar", "COLUMN_KEY", "")));
+                        new Column("column1","int","PRI"),
+                        new Column("column2","varchar","")));
         mockMvc.perform(get("/tablePreview?connectionId=5&schema=test&table=table1")).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.columns", hasSize(2)))
