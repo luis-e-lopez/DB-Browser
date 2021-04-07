@@ -22,9 +22,11 @@ Create the webapp directory if not present.
 
 4. Configure Tomcat's Context Path to `/`
 
-4. Run Tomcat
+5. Run Tomcat
 
-4. In your browser navigate to http://localhost:8080/index
+6. In your browser navigate to http://localhost:8080/index
+
+7. Two tables are created inside the H2 database during the first execution. To avoid that data to be overwritten, set the value of property hibernate.hbm2ddl.auto to **none** inside the application.properties file `hibernate.hbm2ddl.auto=none`
 ---
 
 REST API documentation is under way...
