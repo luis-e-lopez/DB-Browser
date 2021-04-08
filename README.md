@@ -29,4 +29,4 @@ Create the webapp directory if not present.
 7. Two tables are created inside the H2 database during the first execution. To avoid that data to be overwritten, set the value of property hibernate.hbm2ddl.auto to **none** inside the application.properties file `hibernate.hbm2ddl.auto=none`
 ---
 
-REST API documentation is under way...
+Check the API documentation in http://localhost:8080/swagger-ui/
