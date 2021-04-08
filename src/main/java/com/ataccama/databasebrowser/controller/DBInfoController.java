@@ -6,6 +6,7 @@ import com.ataccama.databasebrowser.exception.DatabaseNotFoundException;
 import com.ataccama.databasebrowser.exception.TableNotFoundException;
 import com.ataccama.databasebrowser.model.*;
 import com.ataccama.databasebrowser.service.DBInfoService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ public class DBInfoController {
     @Autowired
     private DBInfoService dbInfoService;
 
+    @ApiOperation(value = "Get the list of schemas from the provided connection id")
     @GetMapping(value = "/schemas")
     public Map<String, List<Schema>> getSchemas(@RequestParam(value = "connectionId") Long connectionId) {
         try {
@@ -35,6 +37,7 @@ public class DBInfoController {
         }
     }
 
+    @ApiOperation(value = "Get the list of tables from the schema")
     @GetMapping(value = "/tables")
     public Map<String, List<Table>> getTables(@RequestParam(value = "connectionId") Long connectionId,
                                   @RequestParam(value = "schema") String schema) {
@@ -49,6 +52,7 @@ public class DBInfoController {
 
     }
 
+    @ApiOperation(value = "Get the list of columns from the table")
     @GetMapping(value = "/columns")
     public Map<String, List<Column>> getColumns(@RequestParam(value = "connectionId") Long connectionId,
                                                 @RequestParam(value = "schema") String schema,
@@ -62,6 +66,7 @@ public class DBInfoController {
         }
     }
 
+    @ApiOperation(value = "Get a max of 10 rows as a preview of the table")
     @GetMapping(value = "/tablePreview")
     public Map<String, List> getTablePreview(@RequestParam(value = "connectionId") Long connectionId,
                                                      @RequestParam(value = "schema") String schema,
@@ -79,6 +84,7 @@ public class DBInfoController {
 
     // Statistics Endpoints
 
+    @ApiOperation(value = "Get the table statistics")
     @GetMapping(value = "/tableStats")
     public Map<String, TableStats> getTableStatistics(@RequestParam(value = "connectionId") Long connectionId,
                                                       @RequestParam(value = "schema") String schema,
@@ -93,6 +99,7 @@ public class DBInfoController {
 
     }
 
+    @ApiOperation(value = "Get the column statistics")
     @GetMapping(value = "/columnStats")
     public Map<String, ColumnStats> getColumnStatistics(@RequestParam(value = "connectionId") Long connectionId,
                                                         @RequestParam(value = "schema") String schema,

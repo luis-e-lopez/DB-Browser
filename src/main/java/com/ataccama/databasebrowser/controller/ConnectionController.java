@@ -3,6 +3,7 @@ package com.ataccama.databasebrowser.controller;
 import com.ataccama.databasebrowser.model.Connection;
 import com.ataccama.databasebrowser.service.ConnectionService;
 import com.ataccama.databasebrowser.service.DatabaseTypeService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +23,7 @@ public class ConnectionController {
     @Autowired
     private DatabaseTypeService databaseTypeService;
 
+    @ApiOperation(value = "Get the View that shows the form to enter a new connection to a DB")
     @GetMapping("/connectionForm")
     public String showAddConnectionForm(Model model) {
         model.addAttribute("connection", new Connection());
@@ -29,6 +31,7 @@ public class ConnectionController {
         return "add-connection";
     }
 
+    @ApiOperation(value = "Add a new connection to a DB and get the index View", notes = "* Only MySQL supported")
     @PostMapping("/addConnection")
     public String addConnection(@Valid Connection connection, BindingResult result, Model model) {
         if (result.hasErrors()) {
@@ -39,12 +42,14 @@ public class ConnectionController {
         return "redirect:/index";
     }
 
+    @ApiOperation(value = "Get the View that shows the list of connections")
     @GetMapping("/index")
     public String showConnectionList(Model model) {
         model.addAttribute("connections", connectionService.findAll());
         return "index";
     }
 
+    @ApiOperation(value = "Get the View that shows the edit form of the connection")
     @GetMapping("/edit/{id}")
     public String showUpdateConnectionForm(@PathVariable("id") long id, Model model) {
         Connection connection = connectionService.findById(id);
@@ -53,6 +58,7 @@ public class ConnectionController {
         return "update-connection";
     }
 
+    @ApiOperation(value = "Update the connection and get the index View")
     @PostMapping("/update/{id}")
     public String updateConnection(@PathVariable("id") long id,
                                    @Valid Connection connection,
@@ -67,6 +73,7 @@ public class ConnectionController {
         return "redirect:/index";
     }
 
+    @ApiOperation(value = "Delete a connection and get the index View")
     @GetMapping("/delete/{id}")
     public String deleteConnection(@PathVariable("id") long id, Model model) {
         Connection connection = connectionService.findById(id);
