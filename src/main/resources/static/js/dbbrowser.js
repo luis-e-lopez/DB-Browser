@@ -1,5 +1,5 @@
 $(function () {
-  // API Enpoint calls
+  // API Endpoint calls
 
   function getDatabases(connectionId, callback, errorCallback) {
     $.ajax({
